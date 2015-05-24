@@ -15,7 +15,10 @@ public class Component extends Applet implements Runnable {
 	private static Graphics g;
 	private static Image screen;
 
+	private static Listening listening;
+
 	private static ArrayList<Dot> dots = new ArrayList<Dot>();
+	public static Player player;
 
 	public static Window w;
 
@@ -29,6 +32,10 @@ public class Component extends Applet implements Runnable {
 	}
 
 	public void init() {
+		listening = new Listening();
+		addMouseListener(listening);
+		addMouseMotionListener(listening);
+		player = new Player();
 		isRunning = true;
 		new Thread(this).start();
 	}
@@ -51,13 +58,16 @@ public class Component extends Applet implements Runnable {
 
 	public void tick() {
 		x++;
-//		if (x % 30 == 0) {
-//			for (Dot d : dots) {
-//				d.tick();
-//			}
-//		}
 		if (x % 20 == 0) {
 			dots.add(new Dot());
+		}
+		player.tick();
+		for (int i = 0; i < dots.size(); i++) {
+			Dot d = dots.get(i);
+			if (player.contains(d)) {
+				player.eat(d.getMass());
+				dots.remove(i);
+			}
 		}
 	}
 
@@ -71,9 +81,12 @@ public class Component extends Applet implements Runnable {
 		for (Dot d : dots) {
 			d.render(g);
 		}
-
+		player.render(g);
 		g = getGraphics();
+		g.setColor(Color.LIGHT_GRAY);
+		// g.fillRect(0, 0, 800, 600);
 		g.drawImage(screen, 0, 0, null);
+		g.dispose();
 	}
 
 }
